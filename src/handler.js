@@ -74,6 +74,37 @@ const addBook = (request, h) => {
     }
 };
 
+const getAllBook = () => ({
+    status: "success",
+    data: {
+        books,
+    },
+});
+
+const getDetailBook = (request, h) => {
+    const { bookId } = request.params;
+
+    // check the book is on the database or no
+    const book = books.filter((bk) => bk.id === bookId)[0];
+    if (book !== undefined) {
+        return {
+            status: "success",
+            data: {
+                book,
+            },
+        };
+    }
+
+    const response = h.response({
+        status: "fail",
+        message: "Buku tidak ditemukan",
+    });
+    response.code(404);
+    return response;
+};
+
 module.exports = {
     addBook,
+    getAllBook,
+    getDetailBook,
 };
