@@ -103,8 +103,76 @@ const getDetailBook = (request, h) => {
     return response;
 };
 
+const editBook = (request, h) => {
+    // data from user
+    const { bookId } = request.params;
+    const {
+        name,
+        year,
+        author,
+        summary,
+        publisher,
+        pageCount,
+        readPage,
+        reading,
+    } = request.payload;
+    const updatedAt = new Date().toISOString();
+    const finished = pageCount === readPage ? true : false;
+
+    // check data that insert by user
+    if (name === undefined) {
+        const response = h.response({
+            status: "fail",
+            message: "Gagal menambahkan buku. Mohon isi nama buku",
+        });
+        response.code(400);
+        return response;
+    } else if (readPage > pageCount) {
+        const response = h.response({
+            status: "fail",
+            message: "Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount",
+        });
+        response.code(400);
+        return response;
+    }
+
+    // find book
+    const index = books.findIndex((book) => book.id === bookId);
+
+    if (index !== -1) {
+        books[index] = {
+            ...books[index],
+            name,
+            year,
+            author,
+            summary,
+            publisher,
+            pageCount,
+            readPage,
+            finished,
+            reading,
+            updatedAt,
+        };
+
+        const response = h.response({
+            status: "success",
+            message: "Buku berhasil diperbarui",
+        });
+        response.code(200);
+        return response;
+    } else {
+        const response = h.response({
+            status: "fail",
+            message: "Gagal memperbarui buku. Id tidak ditemukan",
+        });
+        response.code(404);
+        return response;
+    }
+};
+
 module.exports = {
     addBook,
     getAllBook,
     getDetailBook,
+    editBook,
 };
