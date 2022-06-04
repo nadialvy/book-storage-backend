@@ -74,12 +74,18 @@ const addBook = (request, h) => {
     }
 };
 
-const getAllBook = () => ({
-    status: "success",
-    data: {
-        books,
-    },
-});
+const getAllBook = () => {
+    const getBooks = books.map((book) => (
+        { id: book.id, name: book.name, publisher: book.publisher }
+    ));
+
+    return {
+        status: 'success',
+        data: {
+            books: getBooks,
+        },
+    };
+};
 
 const getDetailBook = (request, h) => {
     const { bookId } = request.params;
@@ -123,14 +129,14 @@ const editBook = (request, h) => {
     if (name === undefined) {
         const response = h.response({
             status: "fail",
-            message: "Gagal menambahkan buku. Mohon isi nama buku",
+            message: "Gagal memperbarui buku. Mohon isi nama buku",
         });
         response.code(400);
         return response;
     } else if (readPage > pageCount) {
         const response = h.response({
             status: "fail",
-            message: "Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount",
+            message: "Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount",
         });
         response.code(400);
         return response;
@@ -174,8 +180,9 @@ const deleteBook = (request, h) => {
     const { bookId } = request.params;
 
     // check index
-    const index = books.filter((book) => book.id === bookId);
-    if (index !== -1) {
+    const index = books.filter((book) => book.id === bookId)[0];
+    console.log(index);
+    if (index !== undefined) {
         books.splice(index, 1);
         const response = h.response({
             status: "success",
