@@ -74,15 +74,85 @@ const addBook = (request, h) => {
     }
 };
 
-const getAllBook = () => {
-    const getBooks = books.map((book) => (
-        { id: book.id, name: book.name, publisher: book.publisher }
-    ));
+const getAllBook = (request) => {
+    const { name } = request.query;
+    if (name !== undefined) {
+        // eslint-disable-next-line max-len
+        const booksFiltered = books.filter((book) => book.name.toLowerCase().includes(name.toLowerCase()));
+        console.log(booksFiltered);
+        if (booksFiltered.length > 0) {
+            return {
+                status: 'success',
+                data: {
+                    books: booksFiltered.map((book) => (
+                        { id: book.id, name: book.name, publisher: book.publisher }
+                    )),
+                },
+            };
+        } else {
+            return {
+                status: 'success',
+                data: {
+                    books: books.map((book) => (
+                        { id: book.id, name: book.name, publisher: book.publisher }
+                    )),
+                },
+            };
+        }
+    }
+
+    const { reading } = request.query;
+    if (reading !== undefined) {
+        if (Number(reading) === 1) {
+            return {
+                status: 'success',
+                data: {
+                    books: books.filter((book) => book.reading === true).map((book) => (
+                        { id: book.id, name: book.name, publisher: book.publisher }
+                    )),
+                },
+            };
+        } else if (Number(reading) === 0) {
+            return {
+                status: 'success',
+                data: {
+                    books: books.filter((book) => book.reading === false).map((book) => (
+                        { id: book.id, name: book.name, publisher: book.publisher }
+                    )),
+                },
+            };
+        }
+    }
+
+    const { finished } = request.query;
+    if (finished !== undefined) {
+        if (Number(finished) === 1) {
+            return {
+                status: 'success',
+                data: {
+                    books: books.filter((book) => book.finished === true).map((book) => (
+                        { id: book.id, name: book.name, publisher: book.publisher }
+                    )),
+                },
+            };
+        } else if (Number(finished) === 0) {
+            return {
+                status: 'success',
+                data: {
+                    books: books.filter((book) => book.finished === false).map((book) => (
+                        { id: book.id, name: book.name, publisher: book.publisher }
+                    )),
+                },
+            };
+        }
+    }
 
     return {
         status: 'success',
         data: {
-            books: getBooks,
+            books: books.map((book) => ({
+                id: book.id, name: book.name, publisher: book.publisher,
+            })),
         },
     };
 };
@@ -180,9 +250,8 @@ const deleteBook = (request, h) => {
     const { bookId } = request.params;
 
     // check index
-    const index = books.filter((book) => book.id === bookId)[0];
-    console.log(index);
-    if (index !== undefined) {
+    const index = books.filter((book) => book.id === bookId);
+    if (index.length === 1) {
         books.splice(index, 1);
         const response = h.response({
             status: "success",
